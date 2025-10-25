@@ -9,118 +9,125 @@ document.addEventListener('DOMContentLoaded', () => {
     const copyBtn = document.getElementById('copy-btn');
     const clearBtn = document.getElementById('clear-btn');
 
-    // The main function that handles input and triggers all other actions
-    function handleInput() {
-        const rawText = jsonInput.value;
-        
-        if (rawText.trim() === '') {
-            resetUI();
-            return;
-        }
+    function handleInput() { /* ... (no changes in this function) ... */ }
 
-        try {
-            const parsedJson = JSON.parse(rawText);
-            // If parsing succeeds, the JSON is valid
-            setValidState();
-            
-            // 1. Format and highlight the JSON
-            const formattedText = JSON.stringify(parsedJson, null, 2);
-            formattedJson.innerHTML = Prism.highlight(formattedText, Prism.languages.json, 'json');
+    // --- REFACTORED AND CORRECTED TREE VIEW LOGIC ---
 
-            // 2. Build and display the interactive tree view
-            buildTreeView(parsedJson, treeViewContainer);
-
-        } catch (error) {
-            // If parsing fails, the JSON is invalid
-            setInvalidState(error.message);
-        }
-    }
-
-    // Recursively builds the HTML for the tree view
     function buildTreeView(data, parentElement) {
         parentElement.innerHTML = ''; // Clear previous tree
-        const treeRoot = document.createElement('div');
+        const treeRoot = document.createElement('ul'); // Start with a UL
         treeRoot.className = 'tree';
         parentElement.appendChild(treeRoot);
 
-        const rootNode = createNode(data, 'JSON');
-        treeRoot.appendChild(rootNode);
+        // The root is just the first node
+        treeRoot.appendChild(createNode(data, 'JSON'));
     }
     
-    // Helper function for buildTreeView to create a single node
+    // This function is completely rewritten for a better HTML structure.
     function createNode(data, key) {
         const li = document.createElement('li');
-        const nodeDiv = document.createElement('div');
-        nodeDiv.className = 'tree-node';
-
-        const isCollapsible = typeof data === 'object' && data !== null && Object.keys(data).length > 0;
         
+        const isCollapsible = typeof data === 'object' && data !== null && Object.keys(data).length > 0;
+
+        // The header contains the clickable key.
+        const header = document.createElement('div');
+        header.className = 'node-header';
+
         const keySpan = document.createElement('span');
         keySpan.className = 'key';
         keySpan.textContent = `${key}: `;
-        nodeDiv.appendChild(keySpan);
+        header.appendChild(keySpan);
         
         if (isCollapsible) {
-            nodeDiv.classList.add('collapsible');
-            keySpan.addEventListener('click', () => {
-                nodeDiv.classList.toggle('collapsed');
+            li.classList.add('collapsible');
+
+            // Add a hint for what the data type is (Array or Object)
+            const typeHint = document.createElement('span');
+            typeHint.className = 'type-hint';
+            const type = Array.isArray(data) ? 'Array' : 'Object';
+            const count = Object.keys(data).length;
+            typeHint.textContent = `${type}[${count}]`;
+            header.appendChild(typeHint);
+
+            // The click listener collapses the parent LI
+            header.addEventListener('click', () => {
+                li.classList.toggle('collapsed');
             });
-            
+
+            // Create the child UL and append it *inside* the LI, after the header.
             const childUl = document.createElement('ul');
+            childUl.className = 'children';
             for (const childKey in data) {
                 childUl.appendChild(createNode(data[childKey], childKey));
             }
-            li.appendChild(nodeDiv);
-            li.appendChild(childUl);
+            li.appendChild(header);
+            li.appendChild(childUl); // Children are now proper descendants
         } else {
+            // For simple values, just add the value span to the header.
             const valueSpan = document.createElement('span');
             valueSpan.className = `value ${typeof data}`;
             valueSpan.textContent = JSON.stringify(data);
-            nodeDiv.appendChild(valueSpan);
-            li.appendChild(nodeDiv);
+            header.appendChild(valueSpan);
+            li.appendChild(header);
         }
         
         return li;
     }
 
 
-    function setValidState() {
-        statusIndicator.textContent = 'Valid JSON';
-        statusIndicator.className = 'status-valid';
-        errorContainer.classList.add('hidden');
-        jsonInput.style.borderColor = 'transparent';
-    }
-
-    function setInvalidState(message) {
-        statusIndicator.textContent = 'Invalid JSON';
-        statusIndicator.className = 'status-invalid';
-        formattedJson.innerHTML = ''; // Clear formatted view
-        treeViewContainer.innerHTML = ''; // Clear tree view
-        errorMessage.textContent = message;
-        errorContainer.classList.remove('hidden');
-    }
-
-    function resetUI() {
-        statusIndicator.textContent = 'Ready';
-        statusIndicator.className = 'status-empty';
-        formattedJson.innerHTML = '';
-        treeViewContainer.innerHTML = '';
-        errorContainer.classList.add('hidden');
-    }
+    function setValidState() { /* ... (no changes) ... */ }
+    function setInvalidState(message) { /* ... (no changes) ... */ }
+    function resetUI() { /* ... (no changes) ... */ }
 
     // --- Event Listeners ---
     jsonInput.addEventListener('input', handleInput);
-
-    clearBtn.addEventListener('click', () => {
-        jsonInput.value = '';
-        resetUI();
-    });
-
-    copyBtn.addEventListener('click', () => {
-        const code = formattedJson.innerText;
-        navigator.clipboard.writeText(code).then(() => {
-            // Optional: add feedback like changing button text
-        });
-    });
-
+    clearBtn.addEventListener('click', () => { /* ... (no changes) ... */ });
+    copyBtn.addEventListener('click', () => { /* ... (no changes) ... */ });
 });
+
+
+// --- PASTE THE FULL HELPER FUNCTIONS HERE (UNCHANGED) ---
+function handleInput() {
+    const rawText = document.getElementById('json-input').value;
+    const formattedJson = document.getElementById('formatted-json');
+    const statusIndicator = document.getElementById('status-indicator');
+    const errorContainer = document.getElementById('error-container');
+    const errorMessage = document.getElementById('error-message');
+    const treeViewContainer = document.getElementById('tree-view-container');
+    
+    if (rawText.trim() === '') {
+        resetUI();
+        return;
+    }
+
+    try {
+        const parsedJson = JSON.parse(rawText);
+        setValidState();
+        const formattedText = JSON.stringify(parsedJson, null, 2);
+        formattedJson.innerHTML = Prism.highlight(formattedText, Prism.languages.json, 'json');
+        buildTreeView(parsedJson, treeViewContainer);
+    } catch (error) {
+        setInvalidState(error.message);
+    }
+}
+function setValidState() {
+    document.getElementById('status-indicator').textContent = 'Valid JSON';
+    document.getElementById('status-indicator').className = 'status-valid';
+    document.getElementById('error-container').classList.add('hidden');
+    document.getElementById('json-input').style.borderColor = 'transparent';
+}
+function setInvalidState(message) {
+    document.getElementById('status-indicator').textContent = 'Invalid JSON';
+    document.getElementById('status-indicator').className = 'status-invalid';
+    document.getElementById('formatted-json').innerHTML = '';
+    document.getElementById('tree-view-container').innerHTML = '';
+    document.getElementById('error-message').textContent = message;
+    document.getElementById('error-container').classList.remove('hidden');
+}
+function resetUI() {
+    document.getElementById('status-indicator').textContent = 'Ready';
+    document.getElementById('status-indicator').className = 'status-empty';
+    document.getElementById('formatted-json').innerHTML = '';
+    document.getElementById('tree-view-container').innerHTML = '';
+    document.getElementById('error-container').classList.add('hidden');
+}
