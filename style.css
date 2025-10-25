@@ -8,6 +8,7 @@
     --blue: #8be9fd;
     --purple: #bd93f9;
     --orange: #ffb86c;
+    --comment: #6272a4;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"; background-color: var(--bg-color); color: var(--text-color); }
@@ -31,20 +32,35 @@ header { padding: 1rem; text-align: center; background-color: var(--panel-bg); b
 #error-container { padding: 1rem; background-color: rgba(255, 85, 85, 0.1); border: 1px solid var(--red); color: var(--red); margin: 1rem; font-family: monospace; }
 #error-container.hidden { display: none; }
 
-/* Tree View Styles */
+/* --- CORRECTED AND IMPROVED TREE VIEW STYLES --- */
 #tree-view-container { padding: 1rem; font-family: "Fira Code", "Consolas", monospace; }
-.tree ul { list-style-type: none; padding-left: 20px; }
+.tree, .tree ul { list-style-type: none; padding-left: 20px; }
 .tree li { position: relative; }
-.tree-node > .key { color: var(--purple); cursor: pointer; user-select: none; /* Prevent text selection on click */ }
-.tree-node > .value { margin-left: 5px; }
-.tree-node > .value.string { color: var(--green); }
-.tree-node > .value.number { color: var(--orange); }
-.tree-node > .value.boolean { color: var(--blue); }
-.tree-node > .value.null { color: #6272a4; }
-.tree-node.collapsible > .key::before { content: '▼'; display: inline-block; margin-right: 6px; transition: transform 0.2s; }
-.tree-node.collapsible.collapsed > .key::before { transform: rotate(-90deg); }
 
-/* --- THIS IS THE CORRECTED RULE --- */
-.tree-node.collapsible.collapsed + ul { 
-    display: none; 
+.node-header { cursor: pointer; user-select: none; }
+.node-header .key { color: var(--purple); }
+.node-header .value { margin-left: 5px; }
+.node-header .value.string { color: var(--green); }
+.node-header .value.number { color: var(--orange); }
+.node-header .value.boolean { color: var(--blue); }
+.node-header .value.null { color: var(--comment); }
+.type-hint { color: var(--comment); margin-left: 8px; font-style: italic; }
+
+/* The arrow for collapsible nodes */
+li.collapsible > .node-header::before {
+    content: '▼';
+    display: inline-block;
+    margin-right: 6px;
+    transition: transform 0.2s;
+    font-size: 0.8em;
+}
+
+/* The state when a node is collapsed */
+li.collapsible.collapsed > .node-header::before {
+    transform: rotate(-90deg);
+}
+
+/* THE KEY FIX: Hide the UL child when the parent LI is collapsed */
+li.collapsible.collapsed > .children {
+    display: none;
 }
