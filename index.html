@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 5: JSON Formatter & Validator</title>
+    <!-- Prism.js CSS for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>JSON Formatter & Validator</h1>
+    </header>
+    <div id="status-bar">
+        <span id="status-indicator" class="status-empty">Ready</span>
+        <div class="actions">
+            <button id="copy-btn">Copy Formatted</button>
+            <button id="clear-btn">Clear</button>
+        </div>
+    </div>
+
+    <main class="app-container">
+        <div class="panel input-panel">
+            <textarea id="json-input" placeholder="Paste your raw JSON here..."></textarea>
+        </div>
+        <div class="panel output-panel">
+            <pre><code id="formatted-json" class="language-json"></code></pre>
+            <div id="error-container" class="hidden">
+                <p id="error-message"></p>
+            </div>
+            <div id="tree-view-container"></div>
+        </div>
+    </main>
+    
+    <!-- Prism.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
