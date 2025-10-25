@@ -35,7 +35,7 @@ header { padding: 1rem; text-align: center; background-color: var(--panel-bg); b
 #tree-view-container { padding: 1rem; font-family: "Fira Code", "Consolas", monospace; }
 .tree ul { list-style-type: none; padding-left: 20px; }
 .tree li { position: relative; }
-.tree-node > .key { color: var(--purple); cursor: pointer; }
+.tree-node > .key { color: var(--purple); cursor: pointer; user-select: none; /* Prevent text selection on click */ }
 .tree-node > .value { margin-left: 5px; }
 .tree-node > .value.string { color: var(--green); }
 .tree-node > .value.number { color: var(--orange); }
@@ -43,4 +43,8 @@ header { padding: 1rem; text-align: center; background-color: var(--panel-bg); b
 .tree-node > .value.null { color: #6272a4; }
 .tree-node.collapsible > .key::before { content: '▼'; display: inline-block; margin-right: 6px; transition: transform 0.2s; }
 .tree-node.collapsible.collapsed > .key::before { transform: rotate(-90deg); }
-.tree-node.collapsible.collapsed > ul { display: none; }
+
+/* --- THIS IS THE CORRECTED RULE --- */
+.tree-node.collapsible.collapsed + ul { 
+    display: none; 
+}
