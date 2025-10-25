@@ -25,11 +25,21 @@
             <textarea id="json-input" placeholder="Paste your raw JSON here..."></textarea>
         </div>
         <div class="panel output-panel">
-            <pre><code id="formatted-json" class="language-json"></code></pre>
+            <div id="output-tabs">
+                <button class="tab-btn active" data-tab="formatted">Formatted</button>
+                <button class="tab-btn" data-tab="tree">Tree View</button>
+            </div>
+            <div id="output-content">
+                <div id="formatted-view" class="output-view active">
+                    <pre><code id="formatted-json" class="language-json"></code></pre>
+                </div>
+                <div id="tree-view" class="output-view">
+                    <!-- Tree view will be built here -->
+                </div>
+            </div>
             <div id="error-container" class="hidden">
                 <p id="error-message"></p>
             </div>
-            <div id="tree-view-container"></div>
         </div>
     </main>
     
