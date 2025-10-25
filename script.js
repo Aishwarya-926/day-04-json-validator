@@ -5,14 +5,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusIndicator = document.getElementById('status-indicator');
     const errorContainer = document.getElementById('error-container');
     const errorMessage = document.getElementById('error-message');
-    const treeViewContainer = document.getElementById('tree-view-container');
+    const treeView = document.getElementById('tree-view');
     const copyBtn = document.getElementById('copy-btn');
     const clearBtn = document.getElementById('clear-btn');
+    const outputTabs = document.getElementById('output-tabs');
 
-    // This is the main function that handles validation and rendering
-    function handleInput() {
+    // --- Debounce Function (For Performance) ---
+    function debounce(func, delay) {
+        let timeoutId;
+        return function(...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
+
+    // --- Core Processing Function ---
+    function processInput() {
         const rawText = jsonInput.value;
-        
         if (rawText.trim() === '') {
             resetUI();
             return;
@@ -22,20 +33,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const parsedJson = JSON.parse(rawText);
             setValidState();
             
+            // Format and highlight the text view
             const formattedText = JSON.stringify(parsedJson, null, 2);
             formattedJson.innerHTML = Prism.highlight(formattedText, Prism.languages.json, 'json');
 
-            buildTreeView(parsedJson, treeViewContainer);
+            // Build the interactive tree view
+            buildTreeView(parsedJson, treeView);
 
         } catch (error) {
             setInvalidState(error.message);
         }
     }
 
-    // --- Corrected and Refactored Tree View Logic ---
-
+    // --- Tree View Logic (This logic is sound) ---
     function buildTreeView(data, parentElement) {
-        parentElement.innerHTML = ''; // Clear previous tree
+        parentElement.innerHTML = '';
         const treeRoot = document.createElement('ul');
         treeRoot.className = 'tree';
         parentElement.appendChild(treeRoot);
@@ -61,11 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const count = Object.keys(data).length;
             typeHint.textContent = `${type}[${count}]`;
             header.appendChild(typeHint);
-
-            header.addEventListener('click', () => {
-                li.classList.toggle('collapsed');
-            });
-
+            header.addEventListener('click', () => li.classList.toggle('collapsed'));
+            
             const childUl = document.createElement('ul');
             childUl.className = 'children';
             for (const childKey in data) {
@@ -80,10 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
             header.appendChild(valueSpan);
             li.appendChild(header);
         }
-        
         return li;
     }
 
+    // --- UI State Functions ---
     function setValidState() {
         statusIndicator.textContent = 'Valid JSON';
         statusIndicator.className = 'status-valid';
@@ -94,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         statusIndicator.textContent = 'Invalid JSON';
         statusIndicator.className = 'status-invalid';
         formattedJson.innerHTML = '';
-        treeViewContainer.innerHTML = '';
+        treeView.innerHTML = '';
         errorMessage.textContent = message;
         errorContainer.classList.remove('hidden');
     }
@@ -104,26 +113,32 @@ document.addEventListener('DOMContentLoaded', () => {
         statusIndicator.textContent = 'Ready';
         statusIndicator.className = 'status-empty';
         formattedJson.innerHTML = '';
-        treeViewContainer.innerHTML = '';
+        treeView.innerHTML = '';
         errorContainer.classList.add('hidden');
     }
 
-    // --- EVENT LISTENERS ---
+    // --- Tab Switching ---
+    outputTabs.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('tab-btn')) return;
+        const targetTab = e.target.dataset.tab;
+        
+        outputTabs.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
 
-    // THE DEFINITIVE FIX: Use the 'change' event instead of 'input'.
-    // This function will now only run when the user is DONE editing and clicks away.
-    jsonInput.addEventListener('change', handleInput);
-    
-    // We also want it to run when the user pastes text.
-    jsonInput.addEventListener('paste', () => {
-        // Use a tiny timeout to allow the paste operation to complete before we read the value.
-        setTimeout(handleInput, 0);
+        document.querySelectorAll('.output-view').forEach(view => {
+            view.classList.toggle('active', view.id === `${targetTab}-view`);
+        });
     });
 
+    // --- Event Listeners ---
+    const debouncedProcessInput = debounce(processInput, 250);
+    jsonInput.addEventListener('input', debouncedProcessInput);
+    jsonInput.addEventListener('paste', () => setTimeout(processInput, 0)); // Immediate on paste
     clearBtn.addEventListener('click', resetUI);
-
     copyBtn.addEventListener('click', () => {
-        const code = formattedJson.innerText;
-        navigator.clipboard.writeText(code);
+        navigator.clipboard.writeText(formattedJson.innerText);
     });
+
+    // Initial call to set the empty state correctly
+    resetUI();
 });
